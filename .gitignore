@@ -1,0 +1,7 @@
+venv/
+env/
+*.venv
+*.streamlit/
+*.h5
+*.keras
+*.log

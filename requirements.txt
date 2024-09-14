@@ -1,0 +1,7 @@
+numpy
+matplotlib
+tensorflow==2.16.1
+runipy
+opencv-python-headless
+streamlit
+streamlit-drawable-canvas
