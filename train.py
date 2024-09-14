@@ -1,11 +1,11 @@
-import os
 import numpy as np
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Flatten, Dropout, BatchNormalization
-from tensorflow.keras.datasets import mnist
-from tensorflow.keras.callbacks import LearningRateScheduler
-from tensorflow.keras.optimizers import Adam
 import cv2
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Flatten, Dropout, BatchNormalization, Conv2D, MaxPooling2D
+from tensorflow.keras.datasets import mnist
+from tensorflow.keras.callbacks import LearningRateScheduler, EarlyStopping
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 # Preprocessing function to ensure images are properly centered and clean
 def preprocess_image(image):
@@ -33,40 +33,70 @@ def train_model(model_file):
     X_train = X_train / 255.0
     X_test = X_test / 255.0
 
+    # Data augmentation to improve model generalization
+    datagen = ImageDataGenerator(
+        rotation_range=10,
+        width_shift_range=0.1,
+        height_shift_range=0.1,
+        zoom_range=0.1,
+        horizontal_flip=False
+    )
+    
+    datagen.fit(X_train.reshape(-1, 28, 28, 1))
+    
     # Define the model architecture
     model = Sequential()
-    model.add(Flatten(input_shape=(28, 28)))
+    
+    model.add(Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1)))
+    model.add(MaxPooling2D((2, 2)))
+    model.add(BatchNormalization())
+    
+    model.add(Conv2D(64, (3, 3), activation='relu'))
+    model.add(MaxPooling2D((2, 2)))
+    model.add(BatchNormalization())
+    
+    model.add(Conv2D(128, (3, 3), activation='relu'))
+    model.add(MaxPooling2D((2, 2)))
+    model.add(BatchNormalization())
+    
+    model.add(Flatten())
+    
+    model.add(Dense(512, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(BatchNormalization())
     
     model.add(Dense(256, activation='relu'))
+    model.add(Dropout(0.5))
     model.add(BatchNormalization())
-    model.add(Dropout(0.3))
-    
-    model.add(Dense(128, activation='relu'))
-    model.add(BatchNormalization())
-    model.add(Dropout(0.3))
-    
-    model.add(Dense(64, activation='relu'))
-    model.add(BatchNormalization())
-    model.add(Dropout(0.3))
     
     # Output layer (10 classes)
     model.add(Dense(10, activation='softmax'))
     
     # Compile the model with a lower learning rate
-    optimizer = Adam(learning_rate=0.001)
+    optimizer = Adam(learning_rate=0.0001)
     model.compile(loss='sparse_categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
     
     # Learning rate scheduler to reduce learning rate as training progresses
     def lr_scheduler(epoch, lr):
-        return lr * 0.9 if epoch > 5 else lr
+        if epoch > 15:
+            return lr * 0.5
+        elif epoch > 10:
+            return lr * 0.75
+        return lr
     
     lr_callback = LearningRateScheduler(lr_scheduler)
     
+    # Early stopping to prevent overfitting
+    early_stopping = EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
+    
     # Train the model with validation split
-    model.fit(X_train, y_train, epochs=20, validation_split=0.2, callbacks=[lr_callback])
+    model.fit(datagen.flow(X_train.reshape(-1, 28, 28, 1), y_train, batch_size=64),
+              epochs=50,
+              validation_data=(X_test.reshape(-1, 28, 28, 1), y_test),
+              callbacks=[lr_callback, early_stopping])
     
     # Evaluate the model on the test data
-    _, accuracy = model.evaluate(X_test, y_test)
+    _, accuracy = model.evaluate(X_test.reshape(-1, 28, 28, 1), y_test)
     print(f'Model accuracy: {accuracy}')
     
     # Save the model to the specified file
@@ -87,4 +117,3 @@ def predict_digit(model, drawn_image):
 if __name__ == "__main__":
     model_file = 'model.keras'
     train_model(model_file)
-

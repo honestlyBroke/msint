@@ -4,7 +4,6 @@ import numpy as np
 from tensorflow.keras.models import load_model
 import streamlit as st
 from streamlit_drawable_canvas import st_canvas
-from train import train_model  # Import the train_model function from train.py
 
 # Streamlit UI
 st.set_page_config(page_title='Handwritten Digit Classifier', page_icon="🚀")
@@ -18,10 +17,7 @@ MODEL_FILE = 'model.keras'
 
 # Check if the model file exists
 if not os.path.isfile(MODEL_DIR):
-    st.warning(f"Model file not found at {MODEL_FILE}. Please train the data first.")
-    if st.button("Train Data", type="primary"):
-        with st.spinner("Training the model..."):
-            train_model(MODEL_FILE)
+    st.warning(f"Model file not found at {MODEL_FILE}. Please train the model first.")
 else:
     try:
         # Load the model
