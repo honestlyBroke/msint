@@ -5,3 +5,4 @@ env/
 *.h5
 *.keras
 *.log
+__pycache__/
