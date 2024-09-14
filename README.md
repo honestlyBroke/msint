@@ -61,62 +61,43 @@ This web application predicts the number that you have drawn on the canvas from 
     import os
     import numpy as np
     from tensorflow.keras.models import Sequential
-    from tensorflow.keras.layers import Dense, Flatten, Dropout, BatchNormalization
+    from tensorflow.keras.layers import Dense, Flatten
     from tensorflow.keras.datasets import mnist
-    from tensorflow.keras.callbacks import LearningRateScheduler
-    from tensorflow.keras.optimizers import Adam
 
-    # Function to train the model
     def train_model(model_file):
         # Load the MNIST dataset
         (X_train, y_train), (X_test, y_test) = mnist.load_data()
 
-        # Normalize the input data
+        # Preprocess the data
         X_train = X_train / 255.0
         X_test = X_test / 255.0
 
         # Define the model architecture
-        model = Sequential()
-        model.add(Flatten(input_shape=(28, 28)))
-        
-        model.add(Dense(512, activation='relu'))
-        model.add(BatchNormalization())
-        model.add(Dropout(0.5))
-        
-        model.add(Dense(256, activation='relu'))
-        model.add(BatchNormalization())
-        model.add(Dropout(0.5))
-        
-        model.add(Dense(128, activation='relu'))
-        model.add(BatchNormalization())
-        model.add(Dropout(0.5))
-        
-        # Output layer (10 classes)
-        model.add(Dense(10, activation='softmax'))
-        
-        # Compile the model with a lower learning rate
-        optimizer = Adam(learning_rate=0.0001)
-        model.compile(loss='sparse_categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
-        
-        # Learning rate scheduler to reduce learning rate as training progresses
-        def lr_scheduler(epoch, lr):
-            return lr * 0.9 if epoch > 5 else lr
-        
-        lr_callback = LearningRateScheduler(lr_scheduler)
-        
-        # Train the model with validation split
-        model.fit(X_train, y_train, epochs=50, validation_split=0.2, callbacks=[lr_callback])
-        
-        # Evaluate the model on the test data
+        model = Sequential([
+            Flatten(input_shape=(28, 28)),
+            Dense(128, activation='relu'),
+            Dense(10, activation='softmax')
+        ])
+
+        # Compile the model
+        model.compile(optimizer='adam', 
+                    loss='sparse_categorical_crossentropy', 
+                    metrics=['accuracy'])
+
+        # Train the model
+        model.fit(X_train, y_train, epochs=10, validation_split=0.2)
+
+        # Evaluate the model
         _, accuracy = model.evaluate(X_test, y_test)
-        print(f'Model accuracy: {accuracy}')
-        
-        # Save the model to the specified file
+        print(f'Model accuracy: {accuracy:.4f}')
+
+        # Save the model
         model.save(model_file)
 
     if __name__ == "__main__":
         model_file = 'model.keras'
         train_model(model_file)
+
     ```
 
     - Execute the `train.py` script to train the model:
