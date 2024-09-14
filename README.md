@@ -1,3 +1,4 @@
+
 # Handwritten Digit Recognizer
 
 This web application predicts the number that you have drawn on the canvas from 0-9 using a trained neural network model. It leverages the MNIST dataset and provides a simple interface for users to draw digits and see predictions.
@@ -20,24 +21,31 @@ This web application predicts the number that you have drawn on the canvas from 
 
 1. Clone this repository:
 
-```bash
-git clone https://github.com/honestlyBroke/msint.git
-cd msint
-```
+    ```bash
+    git clone https://github.com/honestlyBroke/msint.git
+    cd msint
+    ```
 
-2. Install the required packages:
+2. Create and activate a virtual environment:
 
-```bash
-pip install -r requirements.txt
-```
+    ```bash
+    python -m venv venv
+    source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+    ```
+
+3. Install the required packages:
+
+    ```bash
+    pip install -r requirements.txt
+    ```
 
 ## Usage
 
 1. Run the Streamlit application:
 
-```bash
-streamlit run app.py
-```
+    ```bash
+    streamlit run app.py
+    ```
 
 2. Open your web browser and go to `http://localhost:8501`.
 
@@ -51,7 +59,11 @@ You can also test the application online at the following URL: [Handwritten Digi
 
 ## File Structure
 
+- `.gitignore`: Specifies files and directories to ignore in version control.
+- `README.md`: This file.
 - `app.py`: The main Streamlit application file.
+- `requirements.txt`: List of required Python packages.
+- `train.ipynb`: Jupyter notebook for model training (optional).
 - `train.py`: Contains the function to train the model using the MNIST dataset.
 - `model.keras`: The trained model file (generated after training).
 
@@ -79,7 +91,6 @@ You can also test the application online at the following URL: [Handwritten Digi
 Additionally, here is the `requirements.txt` file content for reference:
 
 ```
-plaintext
 tensorflow
 streamlit
 opencv-python
